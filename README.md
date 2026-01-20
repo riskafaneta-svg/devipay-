@@ -1,28 +1,19 @@
 # DEVIPAY
 
-DEVIPAY adalah aplikasi agen pulsa & PPOB berbasis Flutter.
+DEVIPAY adalah aplikasi agen pulsa & PPOB berbasis Android yang dibuat dengan Flutter.
 
-## Fitur Utama
-- Login Firebase
+## Fitur
+- Login
 - Top Up Saldo
-- Bonus Saldo Join WhatsApp
 - Pulsa & Paket Data
-- PPOB (PLN, TV, dll)
+- PPOB
+- Bonus Saldo
 
-## Cara Build APK
-Aplikasi dibuild otomatis menggunakan GitHub Actions.
-
-Langkah:
-1. Push kode ke branch main
-2. Buka tab Actions
-3. Tunggu proses build
-4. Download APK
+## Build APK
+APK dibuild otomatis menggunakan GitHub Actions.
 
 ## Package Name
 com.devipay.app
 
 ## Kontak CS
 Email: devipay95@gmail.com
-
-## Developer
-DEVIPAY
