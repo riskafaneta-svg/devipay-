@@ -1,4 +1,4 @@
 {
-  "baseUrl": "http://rasya.rghost.web.id:5172",
-  "wsUrl": "ws://rasya.rghost.web.id:5172"
+  "baseUrl": "http://xcrinet.cyberpanel.web.id:3001",
+  "wsUrl": "ws://xcrinet.cyberpanel.web.id:3001"
 }
