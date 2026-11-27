@@ -8,17 +8,61 @@ workflows:
       - name: Build debug APK
         script: |
           set -e
-          SETTINGS=$(find . -maxdepth 3 -name settings.gradle.kts | head -n 1)
-          if [ -z "$SETTINGS" ]; then echo "settings.gradle.kts tidak ditemukan"; exit 1; fi
-          cd "$(dirname "$SETTINGS")"
+          cd "${CM_BUILD_DIR:-.}"
+          echo "=== Isi repo ==="
+          find . -maxdepth 4 -not -path "./.git*" | head -n 100
+          APPGRADLE=$(find . -maxdepth 5 -path "*/app/build.gradle.kts" | head -n 1)
+          if [ -z "$APPGRADLE" ]; then
+            echo "ERROR: app/build.gradle.kts tidak ada di repo. Upload folder app."
+            exit 1
+          fi
+          ROOT=$(dirname "$(dirname "$APPGRADLE")")
+          cd "$ROOT"
+          echo "Root proyek: $(pwd)"
+          if [ ! -f settings.gradle.kts ]; then
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "OtakFlashAI"
+          include(":app")
+          EOF
+          fi
+          if [ ! -f build.gradle.kts ]; then
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.2.2" apply false
+              id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+          }
+          EOF
+          fi
+          if [ ! -f gradle.properties ]; then
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          android.nonTransitiveRClass=true
+          kotlin.code.style=official
+          EOF
+          fi
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           if [ -f gradlew ] && [ -f gradle/wrapper/gradle-wrapper.jar ]; then
             chmod +x gradlew
-            ./gradlew assembleDebug
+            ./gradlew assembleDebug --stacktrace
           else
-            curl -sL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
-            unzip -q /tmp/gradle.zip -d /tmp
-            /tmp/gradle-8.5/bin/gradle assembleDebug
+            curl -fsSL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
+            unzip -q -o /tmp/gradle.zip -d /tmp
+            /tmp/gradle-8.5/bin/gradle assembleDebug --stacktrace
           fi
     artifacts:
       - "**/build/outputs/**/*.apk"
