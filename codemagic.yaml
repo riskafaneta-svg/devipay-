@@ -1,0 +1,24 @@
+workflows:
+  otak-flash-ai:
+    name: Otak Flash AI - Debug APK
+    max_build_duration: 30
+    environment:
+      java: 17
+    scripts:
+      - name: Build debug APK
+        script: |
+          set -e
+          SETTINGS=$(find . -maxdepth 3 -name settings.gradle.kts | head -n 1)
+          if [ -z "$SETTINGS" ]; then echo "settings.gradle.kts tidak ditemukan"; exit 1; fi
+          cd "$(dirname "$SETTINGS")"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          if [ -f gradlew ] && [ -f gradle/wrapper/gradle-wrapper.jar ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          else
+            curl -sL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
+            unzip -q /tmp/gradle.zip -d /tmp
+            /tmp/gradle-8.5/bin/gradle assembleDebug
+          fi
+    artifacts:
+      - "**/build/outputs/**/*.apk"
