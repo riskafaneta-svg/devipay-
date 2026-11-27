@@ -9,11 +9,14 @@ workflows:
         script: |
           set -e
           cd "${CM_BUILD_DIR:-.}"
+          if [ -f generate_apk_zip.py ]; then
+            python3 generate_apk_zip.py
+          fi
           echo "=== Isi repo ==="
           find . -maxdepth 4 -not -path "./.git*" | head -n 100
           APPGRADLE=$(find . -maxdepth 5 -path "*/app/build.gradle.kts" | head -n 1)
           if [ -z "$APPGRADLE" ]; then
-            echo "ERROR: app/build.gradle.kts tidak ada di repo. Upload folder app."
+            echo "ERROR: app/build.gradle.kts tidak ada. Upload generate_apk_zip.py atau folder app."
             exit 1
           fi
           ROOT=$(dirname "$(dirname "$APPGRADLE")")
@@ -56,13 +59,8 @@ workflows:
           EOF
           fi
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          if [ -f gradlew ] && [ -f gradle/wrapper/gradle-wrapper.jar ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug --stacktrace
-          else
-            curl -fsSL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
-            unzip -q -o /tmp/gradle.zip -d /tmp
-            /tmp/gradle-8.5/bin/gradle assembleDebug --stacktrace
-          fi
+          curl -fsSL https://services.gradle.org/distributions/gradle-8.5-bin.zip -o /tmp/gradle.zip
+          unzip -q -o /tmp/gradle.zip -d /tmp
+          /tmp/gradle-8.5/bin/gradle assembleDebug --stacktrace
     artifacts:
       - "**/build/outputs/**/*.apk"
